@@ -80,7 +80,7 @@ namespace nvinfer1
       int maxSize{ 512 };
       void *Score, *Score_;
     };
-
+     
     class SelfAttentionPluginCreator : public BaseCreator
     {
     public:
