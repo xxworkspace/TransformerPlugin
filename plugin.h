@@ -15,7 +15,7 @@
  */
 #ifndef TRT_PLUGIN_H
 #define TRT_PLUGIN_H
-#include "NvInferPlugin.h"
+#include <NvInferPlugin.h>
 #include <cuda_runtime.h>
 #include <iostream>
 #include <memory>

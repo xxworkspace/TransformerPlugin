@@ -24,7 +24,6 @@ namespace nvinfer1
 {
   namespace plugin
   {
-
     class SrcAttention : public IPluginV2DynamicExt
     {
     public:

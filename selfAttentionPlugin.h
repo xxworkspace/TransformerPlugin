@@ -77,7 +77,7 @@ namespace nvinfer1
       std::string mNameSpace{ "" };
       int n_Head, n_Feat;
       DataType ctype;
-      int maxSize{ 0 };
+      int maxSize{ 512 };
       void *Score, *Score_;
     };
 

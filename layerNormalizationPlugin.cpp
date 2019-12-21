@@ -26,7 +26,7 @@ using nvinfer1::plugin::LayerNormalizaitonPluginCreator;
 
 namespace
 {
-const char* LAYER_NORMALIZATION_PLUGIN_VERSION{"1"};
+const char* LAYER_NORMALIZATION_PLUGIN_VERSION{"001"};
 const char* LAYER_NORMALIZATION_PLUGIN_NAME{"LayerNormalization_TRT"};
 } // namespace
 
@@ -41,8 +41,8 @@ LayerNormalizaiton::LayerNormalizaiton(const Weights gamma, const Weights beta) 
   CHECK(cudaMalloc(&gamma_, dim * sizeof(float)));
   CHECK(cudaMalloc(&beta_, dim * sizeof(float)));
 
-  CHECK(cudaMemcpy(gamma_, gamma.values, sizeof(float)*dim, cudaMemcpyDeviceToHost));
-  CHECK(cudaMemcpy(beta_, beta.values, sizeof(float)*dim, cudaMemcpyDeviceToHost));
+  CHECK(cudaMemcpy(gamma_, gamma.values, sizeof(float)*dim, cudaMemcpyHostToDevice));
+  CHECK(cudaMemcpy(beta_, beta.values, sizeof(float)*dim, cudaMemcpyHostToDevice));
 }
 
 LayerNormalizaiton::LayerNormalizaiton(const LayerNormalizaiton& other) {
@@ -73,7 +73,8 @@ DimsExprs LayerNormalizaiton::getOutputDimensions(
   int outputIndex, const nvinfer1::DimsExprs* inputs,
   int nbInputs, nvinfer1::IExprBuilder& exprBuilder) {
   ASSERT(nbInputs == 1);
-  return inputs[0];
+  DimsExprs output(inputs[0]);
+  return output;
 }
 
 bool LayerNormalizaiton::supportsFormatCombination(
@@ -173,12 +174,12 @@ IPluginV2DynamicExt* LayerNormalizaitonPluginCreator::createPlugin(
   Weights gamma, beta;
   ASSERT(fc->nbFields == 2);
   gamma.type = DataType::kFLOAT;
-  gamma.count = fc[0].fields->length;
-  gamma.values = fc[0].fields->data;
+  gamma.count = fc->fields[0].length;
+  gamma.values = fc->fields[0].data;
 
   beta.type = DataType::kFLOAT;
-  beta.count = fc[1].fields->length;
-  beta.values = fc[1].fields->data;
+  beta.count = fc->fields[1].length;
+  beta.values = fc->fields[1].data;
 
   return (IPluginV2DynamicExt*)new LayerNormalizaiton(gamma, beta);
 }

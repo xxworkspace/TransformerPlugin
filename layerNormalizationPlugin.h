@@ -24,7 +24,6 @@ namespace nvinfer1
 {
   namespace plugin
   {
-
     class LayerNormalizaiton : public IPluginV2DynamicExt
     {
     public:
@@ -74,9 +73,9 @@ namespace nvinfer1
       const char* getPluginNamespace() const override;
       void setPluginNamespace(const char* pluginNamespace) override;
     private:
+      DataType ctype{ DataType::kFLOAT };
       std::string mNameSpace{""};
       float *gamma_, *beta_;
-      DataType ctype;
       int dim;
     };
 

@@ -26,7 +26,7 @@ using nvinfer1::plugin::SrcAttentionPluginCreator;
 
 namespace
 {
-  const char* SRC_ATTENTION_PLUGIN_VERSION{ "1" };
+  const char* SRC_ATTENTION_PLUGIN_VERSION{ "001" };
   const char* SRC_ATTENTION_PLUGIN_NAME{ "SrcAttention_TRT" };
 } // namespace
 
@@ -42,7 +42,6 @@ SrcAttention::SrcAttention(const Weights kweight, const Weights kbias,
   if (ctype == DataType::kFLOAT) {
     CHECK(cudaMalloc(&k_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&k_Bias, sizeof(float)*n_Feat));
-
     CHECK(cudaMalloc(&v_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&v_Bias, sizeof(float)*n_Feat));
 
@@ -54,7 +53,6 @@ SrcAttention::SrcAttention(const Weights kweight, const Weights kbias,
   else if (ctype == DataType::kHALF) {
     CHECK(cudaMalloc(&k_Weight, sizeof(half)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&k_Bias, sizeof(half)*n_Feat));
-
     CHECK(cudaMalloc(&v_Weight, sizeof(half)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&v_Bias, sizeof(half)*n_Feat));
 
@@ -82,7 +80,6 @@ SrcAttention::SrcAttention(const SrcAttention& other) {
   if (ctype == DataType::kFLOAT) {
     CHECK(cudaMalloc(&k_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&k_Bias, sizeof(float)*n_Feat));
-
     CHECK(cudaMalloc(&v_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&v_Bias, sizeof(float)*n_Feat));
 
@@ -114,7 +111,6 @@ SrcAttention::SrcAttention(const void* buffer, size_t length) {
   if (ctype == DataType::kFLOAT) {
     CHECK(cudaMalloc(&k_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&k_Bias, sizeof(float)*n_Feat));
-
     CHECK(cudaMalloc(&v_Weight, sizeof(float)*n_Feat*n_Feat));
     CHECK(cudaMalloc(&v_Bias, sizeof(float)*n_Feat));
 
@@ -270,7 +266,7 @@ IPluginV2DynamicExt* SrcAttentionPluginCreator::createPlugin(
 
   int nhead = ((int*)fc->fields[0].data)[0],
     nfeat = ((int*)fc->fields[0].data)[1];
-  DataType ctype = (DataType)((int*)fc->fields[0].data)[1];
+  DataType ctype = (DataType)((int*)fc->fields[0].data)[2];
 
   kweight.type = DataType::kFLOAT;
   kweight.count = fc->fields[1].length;

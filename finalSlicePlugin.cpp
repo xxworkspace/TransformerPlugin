@@ -26,20 +26,20 @@ using nvinfer1::plugin::FinalSlicePluginCreator;
 
 namespace
 {
-  const char* FINAL_SLICE_PLUGIN_VERSION{ "1" };
+  const char* FINAL_SLICE_PLUGIN_VERSION{ "001" };
   const char* FINAL_SLICE_PLUGIN_NAME{ "FinalSlice_TRT" };
 } // namespace
 
 PluginFieldCollection FinalSlicePluginCreator::mFC{};
 std::vector<PluginField> FinalSlicePluginCreator::mPluginAttributes;
 
-FinalSlice::FinalSlice() {
-}
+FinalSlice::FinalSlice() {}
 
-FinalSlice::FinalSlice(const FinalSlice& other) {
-}
+FinalSlice::FinalSlice(const FinalSlice& other) {}
 
 FinalSlice::FinalSlice(const void* buffer, size_t length) {
+  const char* ptr = (const char*)buffer;
+  ctype = (DataType)read<int>(ptr);
 }
 
 IPluginV2DynamicExt* FinalSlice::clone()const {
@@ -110,11 +110,11 @@ void FinalSlice::destroy() {}
 
 void FinalSlice::serialize(void* buffer) const {
   char* ptr = (char*)buffer;
-  write<int>(ptr, nvocab);
+  write<int>(ptr, (int)ctype);
 }
 
 size_t FinalSlice::getSerializationSize() const {
-  return sizeof(int) * 3 + sizeof(float) * nvocab * embed;
+  return sizeof(int);
 }
 
 const char* FinalSlice::getPluginNamespace() const {
@@ -146,17 +146,7 @@ const PluginFieldCollection* FinalSlicePluginCreator::getFieldNames() {
 
 IPluginV2DynamicExt* FinalSlicePluginCreator::createPlugin(
   const char* name, const PluginFieldCollection* fc) {
-  Weights embed;
-  DimsHW shape;
-  ASSERT(fc->nbFields == 2);
-  embed.type = DataType::kFLOAT;
-  embed.count = fc[0].fields->length;
-  embed.values = fc[0].fields->data;
-
-  shape.d[0] = ((int*)fc[1].fields)[0];
-  shape.d[1] = ((int*)fc[1].fields)[1];
-
-  return (IPluginV2DynamicExt*)new FinalSlice(embed, shape);
+  return (IPluginV2DynamicExt*)new FinalSlice();
 }
 
 IPluginV2DynamicExt* FinalSlicePluginCreator::deserializePlugin(

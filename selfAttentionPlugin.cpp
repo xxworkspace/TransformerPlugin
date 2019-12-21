@@ -87,7 +87,7 @@ int SelfAttention::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   const nvinfer1::PluginTensorDesc* outputDesc,
   const void* const* inputs, void* const* outputs,
   void* workspace, cudaStream_t stream) {
-
+  int batchsize = inputDesc[0].dims.d[0];
 
   return 0;
 }

@@ -24,21 +24,10 @@ namespace nvinfer1
 {
   namespace plugin
   {
-    class EmbeddingExpr :public IDimensionExpr {
-    public:
-      EmbeddingExpr(int v) {
-        value = v;
-      }
-      bool isConstant()const { return true; }
-      int getConstantValue()const { return value; }
-    public:
-      int value;
-    };
-
     class FinalSlice : public IPluginV2DynamicExt
     {
     public:
-      FinalSlice(const Weights gamma,const DimsHW shape);
+      FinalSlice();
 
       FinalSlice(const FinalSlice&);
 
@@ -84,10 +73,8 @@ namespace nvinfer1
       const char* getPluginNamespace() const override;
       void setPluginNamespace(const char* pluginNamespace) override;
     private:
-      std::string mNameSpace{ "" };
-      float *embedding;
-      int nvocab,embed;
-      DataType ctype;
+      DataType ctype{ DataType::kFLOAT };
+      std::string mNameSpace{""};
     };
 
     class FinalSlicePluginCreator : public BaseCreator
