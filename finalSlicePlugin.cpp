@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "finalSlicePlugin.h"
+#include "TransformerKernel.h"
 #include "cublas_v2.h"
 #include <cstring>
 #include <cudnn.h>
@@ -80,7 +81,14 @@ int FinalSlice::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   const nvinfer1::PluginTensorDesc* outputDesc,
   const void* const* inputs, void* const* outputs,
   void* workspace, cudaStream_t stream) {
+  int n = inputDesc[0].dims.d[0];
+  int l = inputDesc[0].dims.d[1];
+  int c = inputDesc[0].dims.d[2];
 
+  if (ctype == DataType::kFLOAT)
+    finalSlice((float*)inputs[0], n, l, c, (float*)outputs[0], stream);
+  else
+    finalSlice((half*)inputs[0], n, l, c, (half*)outputs[0], stream);
 
   return 0;
 }

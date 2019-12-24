@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "layerNormalizationPlugin.h"
+#include "TransformerKernel.h"
 #include "cublas_v2.h"
 #include <cstring>
 #include <cudnn.h>
@@ -101,7 +102,16 @@ int LayerNormalizaiton::enqueue(const nvinfer1::PluginTensorDesc* inputDesc,
   const nvinfer1::PluginTensorDesc* outputDesc,
   const void* const* inputs, void* const* outputs,
   void* workspace, cudaStream_t stream) {
+  int batch = inputDesc[0].dims.d[0];
+  for(int i = 1 ;i < inputDesc[0].dims.nbDims ; ++i)
+    batch *= inputDesc[0].dims.d[i];
 
+  if (DataType::kFLOAT == ctype) {
+    layerNormalization((float*)inputs[0], gamma_, beta_, batch, dim, (float*)outputs[0], stream);
+  }
+  else {
+    layerNormalization((half*)inputs[0], gamma_, beta_, batch, dim, (half*)outputs[0], stream);
+  }
 
   return 0;
 }

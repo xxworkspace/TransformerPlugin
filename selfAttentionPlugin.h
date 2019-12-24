@@ -17,7 +17,9 @@
 #define TRT_SELF_ATTENTION_PLUGIN_H
 
 #include <vector>
+#include <cudnn.h>
 #include "plugin.h"
+#include <cublas_v2.h>
 #include <cuda_fp16.h>
 
 namespace nvinfer1
@@ -28,7 +30,7 @@ namespace nvinfer1
     class SelfAttention : public IPluginV2DynamicExt
     {
     public:
-      SelfAttention(const int nhead,const int nfeat);
+      SelfAttention(const int nhead,const int nfeat,const int mask);
 
       SelfAttention(const SelfAttention&);
 
@@ -74,11 +76,31 @@ namespace nvinfer1
       const char* getPluginNamespace() const override;
       void setPluginNamespace(const char* pluginNamespace) override;
     private:
+      size_t type2size(DataType type)const {
+        if (type == DataType::kFLOAT || type == DataType::kINT32)
+          return 4;
+        else if (type == DataType::kHALF) {
+          return 2;
+        }
+        else return 1;
+      }
+
+      void *Score{ NULL }, *Score_{ NULL };
       std::string mNameSpace{ "" };
-      int n_Head, n_Feat;
+      int n_Head, n_Feat, Mask;
       DataType ctype;
-      int maxSize{ 512 };
-      void *Score, *Score_;
+      int maxSize{ 0 };
+      //cublas
+      void **A[3], **B[2], **C[2], **gA, **gB, **gC;
+
+      float alpha[1] = { 1.0 }, belta[1] = { 0.0 };
+      half halpha[1] = { 1.0 }, hbelta[1] = { 0.0 };
+
+      cudnnHandle_t dnnHandle;
+      cublasHandle_t blasHandle;
+      cudnnTensorDescriptor_t xdes;
+      cudnnSoftmaxAlgorithm_t algo_t{ CUDNN_SOFTMAX_ACCURATE };
+      cudnnSoftmaxMode_t mode_t{ CUDNN_SOFTMAX_MODE_INSTANCE };
     };
      
     class SelfAttentionPluginCreator : public BaseCreator

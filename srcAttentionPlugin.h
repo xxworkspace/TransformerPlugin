@@ -17,7 +17,9 @@
 #define TRT_SRC_ATTENTION_PLUGIN_H
 
 #include <vector>
+#include <cudnn.h>
 #include "plugin.h"
+#include <cublas_v2.h>
 #include <cuda_fp16.h>
 
 namespace nvinfer1
@@ -75,14 +77,33 @@ namespace nvinfer1
       const char* getPluginNamespace() const override;
       void setPluginNamespace(const char* pluginNamespace) override;
     private:
+      size_t type2size(DataType type)const {
+        if (type == DataType::kFLOAT || type == DataType::kINT32)
+          return 4;
+        else if (type == DataType::kHALF) {
+          return 2;
+        }
+        else return 1;
+      }
       std::string mNameSpace{ "" };
-      int maxSize{ 0 }, maxSeql{ 0 };
+      int maxLen{ 0 }, maxSeql{ 0 };
       int n_Head, n_Feat;
       DataType ctype;
       void *K, *V;
       void *Score, *Score_;
       void *k_Weight, *k_Bias;
       void *v_Weight, *v_Bias;
+
+      //cubals cudnn
+      void **A[2], **B[2], **C[2], **gA, **gB, **gC;
+      float alpha[1] = { 1.0 }, belta[1] = { 0.0 };
+      half halpha[1] = { 1.0 }, hbelta[1] = { 0.0 };
+
+      cudnnHandle_t dnnHandle;
+      cublasHandle_t blasHandle;
+      cudnnTensorDescriptor_t kvdes, bdes, xdes;
+      cudnnSoftmaxAlgorithm_t algo_t{ CUDNN_SOFTMAX_ACCURATE };
+      cudnnSoftmaxMode_t mode_t{ CUDNN_SOFTMAX_MODE_CHANNEL };
     };
 
     class SrcAttentionPluginCreator : public BaseCreator
